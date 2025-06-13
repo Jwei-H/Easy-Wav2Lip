@@ -24,22 +24,35 @@ def get_basicsr_location():
     result = subprocess.run(['pip', 'show', 'basicsr'], capture_output=True, text=True)
     for line in result.stdout.split('\n'):
         if 'Location: ' in line:
-            return line.split('Location: ')[1]
+            return line.split('Location: ')[1].strip() # .strip() to remove potential trailing spaces
     return None
 
 # Move and replace a file to the basicsr location
-def move_and_replace_file_to_basicsr(file_name):
-    basicsr_location = get_basicsr_location()
-    if basicsr_location:
-        destination = os.path.join(basicsr_location, file_name)
-        # Move and replace the file
-        shutil.copyfile(file_name, destination)
-        print(f'File replaced at {destination}')
+def move_and_replace_file_to_basicsr(file_name_to_copy): # Renamed for clarity
+    basicsr_package_location = get_basicsr_location()
+    if basicsr_package_location:
+        # Correct destination path for degradations.py within the basicsr package
+        destination_path = os.path.join(basicsr_package_location, 'basicsr', 'data', file_name_to_copy)
+        
+        # The source file is assumed to be in the current working directory of install.py
+        source_file_path = os.path.join(os.getcwd(), file_name_to_copy) 
+        
+        if not os.path.exists(source_file_path):
+            print(f'Error: Source file {source_file_path} not found.')
+            return
+
+        try:
+            # Ensure the target directory exists (it should if basicsr is installed)
+            os.makedirs(os.path.dirname(destination_path), exist_ok=True)
+            shutil.copyfile(source_file_path, destination_path)
+            print(f'File {file_name_to_copy} replaced at {destination_path}')
+        except Exception as e:
+            print(f'Error replacing file {file_name_to_copy}: {e}')
     else:
         print('Could not find basicsr location.')
 
 # Example usage
-file_to_replace = 'degradations.py'  # Replace with your file name
+file_to_replace = 'degradations.py'  # This file should be in the Easy-Wav2Lip directory
 move_and_replace_file_to_basicsr(file_to_replace)
 
 
