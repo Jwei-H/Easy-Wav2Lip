@@ -754,7 +754,8 @@ def main():
                 out.write(f)
 
     # Close the window(s) when done
-    cv2.destroyAllWindows()
+    # if you are using a GUI, uncomment the next line
+    # cv2.destroyAllWindows()
 
     out.release()
 
